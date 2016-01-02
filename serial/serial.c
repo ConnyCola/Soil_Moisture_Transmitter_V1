@@ -211,8 +211,6 @@ void send_CMD(CMD cmd){
 		printf(" ");
 	printf("%i",cmd.val1);
 
-	printf(" ");
-
 	if(cmd.val2 < 1000)
 		printf(" ");
 	if(cmd.val2 < 100)
@@ -227,4 +225,8 @@ void send_CMD(CMD cmd){
 
 void send_short_CMD(CMD cmd){
 	printf("%c",cmd.cmd);
+}
+
+void send_medium_CMD(char c, CMD cmd){
+	printf("%c%c",c,cmd.cmd);
 }
