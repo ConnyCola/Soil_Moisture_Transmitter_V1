@@ -46,7 +46,11 @@ void MRFI_RxCompleteISR_new()	// in Components/mrfi/radios/family5/mrfi_radio.c
 		//cmd.val1 = packetreceived.frame[11];
 		//cmd.val2 = packetreceived.frame[12];
 
-		send_short_CMD(cmd);
+		if (cmd.cmd == CMD_RSSI){
+			packetreceived.frame[0] = 16;
+			while(MRFI_TX_RESULT_SUCCESS!=MRFI_Transmit(&packetreceived, MRFI_TX_TYPE_FORCED));
+		}else
+			send_short_CMD(cmd);
 		//send_medium_CMD(node_ID,cmd);
 	}
 	else if(read_ID == BROADCAST){
