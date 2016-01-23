@@ -64,20 +64,26 @@ __interrupt void USCI_A0_ISR(void)
 {	// Data back from Sensor
 
 	static int count = 0;
+	static int error = 0;
 	int offset = 9 + 2;
 	char in_key = UCA0RXBUF;
 
 	if(in_key == 0x0A) // '\n'
-	{
-		packet.frame[offset -2] = (node_ID/10) + '0';
+	{	packet.frame[offset -2] = (node_ID/10) + '0';
 		packet.frame[offset -1] = (node_ID%10) + '0';
-		while(MRFI_TX_RESULT_SUCCESS!=MRFI_Transmit(&packet, MRFI_TX_TYPE_FORCED));
+		if(!error)
+			while(MRFI_TX_RESULT_SUCCESS!=MRFI_Transmit(&packet, MRFI_TX_TYPE_FORCED));
 		count = 0;
+		error = 0;
 	}
-	else{
+
+	else if(((in_key >= '0')&&(in_key <= '9'))||((in_key >='A')&&(in_key <='Z'))||(in_key == ' ')||(in_key == 0x0A)){
 		packet.frame[offset + count] = in_key;
 		packet.frame[0] = offset + count;
 		count++;
+	}
+	else{
+		error = 1;
 	}
 
 }
