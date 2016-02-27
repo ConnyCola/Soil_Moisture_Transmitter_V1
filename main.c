@@ -7,12 +7,12 @@
 #define msg_ON  0x02
 #define BROADCAST 254
 
-#define _DEMO
+//#define _DEMO
 
 mrfiPacket_t packet;
 mrfiPacket_t packetreceived;
 CMD cmd;
-char node_ID = 23;
+char node_ID = 10;
 
 void main (void)
 {	WDTCTL = WDTPW+WDTHOLD;                   // Stop watchdog timer
@@ -42,61 +42,64 @@ void MRFI_RxCompleteISR_new()	// in Components/mrfi/radios/family5/mrfi_radio.c
 	int read_ID = (packetreceived.frame[9] - '0') * 10;
 	    read_ID += (packetreceived.frame[10] - '0');
 
-	//if (read_ID == node_ID){
-	if(read_ID != 10){
+#ifndef _DEMO
+	if (read_ID == node_ID){
 		CMD cmd;
 		cmd.cmd = packetreceived.frame[11];
 		//cmd.val1 = packetreceived.frame[11];
 		//cmd.val2 = packetreceived.frame[12];
-#ifndef _DEMO
 		if (cmd.cmd == CMD_RSSI){
 			packetreceived.frame[0] = 16;
 			while(MRFI_TX_RESULT_SUCCESS!=MRFI_Transmit(&packetreceived, MRFI_TX_TYPE_FORCED));
 		}else
 			send_short_CMD(cmd);
-#else
-		switch (cmd.cmd) {
-		case CMD_MOIS: //A
-			packetreceived.frame[0]= 16;
-			packetreceived.frame[12]=' ';
-			packetreceived.frame[13]=' ';
-			packetreceived.frame[14]='0'+(rand()%9)+1;
-			packetreceived.frame[15]='0'+(rand()%9);
-			while(MRFI_TX_RESULT_SUCCESS!=MRFI_Transmit(&packetreceived, MRFI_TX_TYPE_FORCED));
-
-			break;
-		case CMD_VOLT: //B
-			break;
-		case CMD_MIN: //C
-			break;
-		case CMD_MAX: //D
-			break;
-		case CMD_CALI: //E
-			break;
-		case CMD_DRY:  //F
-			break;
-		case CMD_WET:  //G
-			break;
-		case CMD_FIN:  //H
-			break;
-		case CMD_TEST: //I
-			break;
-		case CMD_VERS: //J
-			break;
-		case CMD_RSSI: //K
-			packetreceived.frame[0] = 16;
-			while(MRFI_TX_RESULT_SUCCESS!=MRFI_Transmit(&packetreceived, MRFI_TX_TYPE_FORCED));
-			break;
-		default:
-			cmd.cmd = CMD_ERROR;
-			break;
-		}
-#endif
-		//send_medium_CMD(node_ID,cmd);
 	}
 	else if(read_ID == BROADCAST){
 
 	}
+
+#else
+	if(read_ID != node_ID){
+		switch (cmd.cmd) {
+			case CMD_MOIS: //A
+				packetreceived.frame[0]= 16;
+				packetreceived.frame[12]=' ';
+				packetreceived.frame[13]=' ';
+				packetreceived.frame[14]='0'+(rand()%9)+1;
+				packetreceived.frame[15]='0'+(rand()%9);
+				while(MRFI_TX_RESULT_SUCCESS!=MRFI_Transmit(&packetreceived, MRFI_TX_TYPE_FORCED));
+
+				break;
+			case CMD_VOLT: //B
+				break;
+			case CMD_MIN: //C
+				break;
+			case CMD_MAX: //D
+				break;
+			case CMD_CALI: //E
+				break;
+			case CMD_DRY:  //F
+				break;
+			case CMD_WET:  //G
+				break;
+			case CMD_FIN:  //H
+				break;
+			case CMD_TEST: //I
+				break;
+			case CMD_VERS: //J
+				break;
+			case CMD_RSSI: //K
+				packetreceived.frame[0] = 16;
+				while(MRFI_TX_RESULT_SUCCESS!=MRFI_Transmit(&packetreceived, MRFI_TX_TYPE_FORCED));
+				break;
+			default:
+				cmd.cmd = CMD_ERROR;
+				break;
+			}
+	}
+
+#endif
+		//send_medium_CMD(node_ID,cmd);
 
 
 }
